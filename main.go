@@ -2,34 +2,52 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"os"
 	"os/exec"
 	"strings"
 )
 
 func main() {
-	needed := []string{"fzf", "git", "go", "kubernetes-cli", "kustomize", "node", "r", "zsh-autosuggestions", "zsh"}
-	cmd := exec.Command("brew", "leaves")
-	out, err := cmd.CombinedOutput()
+	needed := []string{"fzf", "git", "go", "kubernetes-cli", "kustomize", "node", "r", "zsh-autosuggestions", "zsh", "awscli", "terraform", "java", "helm"}
+	var answer string
+
+	for {
+		diff := diff(getLeaves(), needed)
+
+		if len(diff) == 0 {
+			fmt.Println("No packages to uninstall")
+			os.Exit(0)
+		}
+
+		fmt.Println("Plan to uninstall: \n", diff, "\nType 'yes' if you agree")
+
+		fmt.Scanln(&answer)
+		if answer != "yes" {
+			os.Exit(1)
+		}
+		for _, pkg := range diff {
+			uninstall(pkg)
+		}
+	}
+}
+func getLeaves() []string {
+	out, err := exec.Command("brew", "leaves").CombinedOutput()
 
 	if err != nil {
-		log.Fatal("cmd.Run() failed with %s\n", err)
+		fmt.Println("cmd.Run() failed with", err)
+		os.Exit(1)
 	}
-	leaves := strings.Split(string(out), "\n")
-	diff := diff(leaves, needed)
-
-	for _, pkg := range diff {
-		uninstall(pkg)
-	}
+	return strings.Split(string(out), "\n")
 }
 
 func uninstall(pkg string) {
-	fmt.Printf("Trying to uninstall %s...", pkg)
-	out, err := exec.Command("brew", "uninstall", pkg).CombinedOutput()
+	fmt.Println("Trying to uninstall", pkg)
+	out, err := exec.Command("brew", "uninstall", "--force", pkg).CombinedOutput()
 	if err != nil {
-		log.Fatal("failed to uninstall %s with error %s\n", pkg, err)
+		fmt.Println("failed to uninstall ", pkg, " with error ", err)
+		os.Exit(2)
 	}
-	fmt.Printf("%s", out)
+	fmt.Println(string(out))
 }
 
 func contains(str string, arr []string) bool {
