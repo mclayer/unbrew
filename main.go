@@ -8,7 +8,22 @@ import (
 )
 
 func main() {
-	needed := []string{"fzf", "git", "go", "kubernetes-cli", "kustomize", "node", "r", "zsh-autosuggestions", "zsh", "awscli", "terraform", "java", "helm"}
+	needed := []string{
+		"fzf",
+		"git",
+		"go",
+		"kubernetes-cli",
+		"kustomize",
+		"node",
+		"zsh-autosuggestions",
+		"zsh",
+		"awscli",
+		"terraform",
+		"java",
+		"zsh-autosuggestions",
+		"dbeaver-community",
+		"gcc",
+	}
 	var answer string
 
 	for {
@@ -62,7 +77,7 @@ func contains(str string, arr []string) bool {
 func diff(arr1 []string, arr2 []string) []string {
 	res := []string{}
 	for _, x := range arr1 {
-		if !contains(x, arr2) && len(x) > 1 {
+		if !contains(x, arr2) && len(x) >= 1 {
 			res = append(res, x)
 		}
 	}
